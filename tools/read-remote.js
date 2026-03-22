@@ -1,6 +1,7 @@
 /**
  * null_byte Remote PGP Message Reader
- * Run: node tools/read-remote.js
+ * Run: $env:ADMIN_TOKEN="@Sanket108"; node tools/read-remote.js all
+
  * 
  * Fetches encrypted messages from your live Render deployment
  * and decrypts them locally using your private key.
@@ -95,7 +96,7 @@ if (!ADMIN_TOKEN) {
 
   for (let i = 0; i < toRead.length; i++) {
     if (shownCount >= limit) break; // Stop decrypting once we hit the limit
-    
+
     scannedCount++;
     const m = toRead[i];
     const msgLabel = `[Message #${messages.length - i} (Newest)]`;
@@ -103,7 +104,7 @@ if (!ADMIN_TOKEN) {
     try {
       if (!m.message.includes('-----BEGIN PGP MESSAGE-----')) {
         if (filterWord && !m.name.toLowerCase().includes(filterWord) && !m.email.toLowerCase().includes(filterWord) && !m.message.toLowerCase().includes(filterWord)) continue;
-        
+
         console.log(msgLabel);
         console.log(`From:   ${m.name} <${m.email}>`);
         console.log(`Date:   ${new Date(m.timestamp).toLocaleString()}`);
@@ -118,16 +119,16 @@ if (!ADMIN_TOKEN) {
           message: msg,
           decryptionKeys: privateKey
         });
-        
+
         const decryptedText = decrypted.trim();
-        
+
         if (filterWord) {
           const isMatch = m.name.toLowerCase().includes(filterWord) ||
             m.email.toLowerCase().includes(filterWord) ||
             decryptedText.toLowerCase().includes(filterWord);
           if (!isMatch) continue; // Skip to next message if no match
         }
-        
+
         console.log(msgLabel);
         console.log(`From:   ${m.name} <${m.email}>`);
         console.log(`Date:   ${new Date(m.timestamp).toLocaleString()}`);

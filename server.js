@@ -5,43 +5,42 @@ const cors = require('cors');
 const path = require('path');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
-const { Resend } = require('resend');
 
-/* ─── EMAIL TRANSPORT SETUP (RESEND API) ─── */
-const resend = new Resend(process.env.RESEND_API_KEY);
-
+/* ─── EMAIL TRANSPORT SETUP (EMAILJS API) ─── */
 async function sendGhostReply(toEmail, toName) {
-  if (!process.env.RESEND_API_KEY) return;
-  
-  const textBody = `[SECURE TRANSMISSION RECEIVED]
+  const serviceId = process.env.EMAILJS_SERVICE_ID;
+  const templateId = process.env.EMAILJS_TEMPLATE_ID;
+  const publicKey = process.env.EMAILJS_PUBLIC_KEY;
+  const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
-Target Identity: ${toName} <${toEmail}>
-Status: ENCRYPTED & LOGGED
+  if (!serviceId || !templateId || !publicKey || !privateKey) return;
 
-Your message has successfully breached the perimeter and reached Neo4U's secure relay.
-
-I have received your transmission. The contents are now encrypted with my public key and stored offline.
-I will decrypt and review your message, and respond when the time is right.
-
----
-[END OF AUTOMATED RESPONSE]
-Neo4U / null_byte_`;
+  const payload = {
+    service_id: serviceId,
+    template_id: templateId,
+    user_id: publicKey,
+    accessToken: privateKey,
+    template_params: {
+      to_email: toEmail,
+      to_name: toName
+    }
+  };
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Neo4U Relay <onboarding@resend.dev>',
-      to: toEmail,
-      subject: '[null_byte] Transmission Received 👁️‍🗨️',
-      text: textBody
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
 
-    if (error) {
-      console.error(`[EMAIL ERROR] Resend rejected the email: ${error.message}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[EMAIL ERROR] EmailJS rejected the email: ${errorText}`);
       return;
     }
-    console.log(`[EMAIL] Ghost reply sent to ${toEmail} via Resend ID: ${data.id}`);
+    console.log(`[EMAIL] Ghost reply sent to ${toEmail} via EmailJS`);
   } catch (err) {
-    console.error(`[EMAIL ERROR] Failed to interact with Resend: ${err.message}`);
+    console.error(`[EMAIL ERROR] Failed to interact with EmailJS: ${err.message}`);
   }
 }
 
