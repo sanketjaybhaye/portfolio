@@ -5,19 +5,13 @@ const cors = require('cors');
 const path = require('path');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-/* ─── EMAIL TRANSPORT SETUP ─── */
-const emailTransport = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+/* ─── EMAIL TRANSPORT SETUP (RESEND API) ─── */
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendGhostReply(toEmail, toName) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return;
+  if (!process.env.RESEND_API_KEY) return;
   
   const textBody = `[SECURE TRANSMISSION RECEIVED]
 
@@ -34,15 +28,20 @@ I will decrypt and review your message, and respond when the time is right.
 Neo4U / null_byte_`;
 
   try {
-    await emailTransport.sendMail({
-      from: `"Neo4U Relay" <${process.env.EMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from: 'Neo4U Relay <onboarding@resend.dev>',
       to: toEmail,
       subject: '[null_byte] Transmission Received 👁️‍🗨️',
       text: textBody
     });
-    console.log(`[EMAIL] Ghost reply sent to ${toEmail}`);
+
+    if (error) {
+      console.error(`[EMAIL ERROR] Resend rejected the email: ${error.message}`);
+      return;
+    }
+    console.log(`[EMAIL] Ghost reply sent to ${toEmail} via Resend ID: ${data.id}`);
   } catch (err) {
-    console.error(`[EMAIL ERROR] Failed to send ghost reply: ${err.message}`);
+    console.error(`[EMAIL ERROR] Failed to interact with Resend: ${err.message}`);
   }
 }
 
