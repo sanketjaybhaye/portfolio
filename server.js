@@ -7,7 +7,7 @@ const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 
 /* ─── DATABASE SETUP ─── */
-const adapter = new FileSync(path.join(__dirname, 'portfolio.db.json'));
+const adapter = new FileSync(path.join(__dirname, 'portfolio_v2.db.json'));
 const db = low(adapter);
 
 /* ─── SEED DEFAULT DATA ─── */
