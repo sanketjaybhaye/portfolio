@@ -68,32 +68,62 @@ if (!ADMIN_TOKEN) {
   console.log(`    DECRYPTING REMOTE MESSAGES `);
   console.log(`======================================================\n`);
 
+  const args = process.argv.slice(2);
+  const filterWord = args.join(' ').toLowerCase();
+
+  if (filterWord) {
+    console.log(`[INFO] 🔍 Filtering messages containing: "${filterWord}"`);
+  }
+
   // Show newest first
   const toRead = messages.reverse();
 
   for (let i = 0; i < toRead.length; i++) {
     const m = toRead[i];
-    console.log(`[Message #${messages.length - i} (Newest)]`);
-    console.log(`From:   ${m.name} <${m.email}>`);
-    console.log(`Date:   ${new Date(m.timestamp).toLocaleString()}`);
-    console.log('---');
 
     try {
       if (!m.message.includes('-----BEGIN PGP MESSAGE-----')) {
+        if (filterWord && !m.name.toLowerCase().includes(filterWord) && !m.email.toLowerCase().includes(filterWord) && !m.message.toLowerCase().includes(filterWord)) continue;
+        
+        console.log(`[Message #${messages.length - i} (Newest)]`);
+        console.log(`From:   ${m.name} <${m.email}>`);
+        console.log(`Date:   ${new Date(m.timestamp).toLocaleString()}`);
+        console.log('---');
         console.log('[Unencrypted Message]:');
         console.log(m.message);
+        console.log(`\n──────────────────────────────────────────────────────\n`);
       } else {
         const msg = await openpgp.readMessage({ armoredMessage: m.message });
         const { data: decrypted } = await openpgp.decrypt({
           message: msg,
           decryptionKeys: privateKey
         });
+        
+        const decryptedText = decrypted.trim();
+        
+        if (filterWord) {
+          const isMatch = m.name.toLowerCase().includes(filterWord) || 
+                          m.email.toLowerCase().includes(filterWord) || 
+                          decryptedText.toLowerCase().includes(filterWord);
+          if (!isMatch) continue; // Skip to next message if no match
+        }
+        
+        console.log(`[Message #${messages.length - i} (Newest)]`);
+        console.log(`From:   ${m.name} <${m.email}>`);
+        console.log(`Date:   ${new Date(m.timestamp).toLocaleString()}`);
+        console.log('---');
         console.log('[DECRYPTED]:');
-        console.log(decrypted.trim());
+        console.log(decryptedText);
+        console.log(`\n──────────────────────────────────────────────────────\n`);
       }
     } catch (err) {
-      console.log('[ERROR] Failed to decrypt this message. Does it belong to another key?');
+      if (!filterWord) { // Only show errors if not filtering
+        console.log(`[Message #${messages.length - i} (Newest)]`);
+        console.log(`From:   ${m.name} <${m.email}>`);
+        console.log('---');
+        console.log('[ERROR] Failed to decrypt this message. Does it belong to another key?');
+        console.log(`\n──────────────────────────────────────────────────────\n`);
+      }
     }
-    console.log(`\n──────────────────────────────────────────────────────\n`);
   }
 })();
