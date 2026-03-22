@@ -5,6 +5,48 @@ const cors = require('cors');
 const path = require('path');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
+const nodemailer = require('nodemailer');
+
+/* ─── EMAIL TRANSPORT SETUP ─── */
+const emailTransport = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.EMAIL_PORT, 10) || 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+async function sendGhostReply(toEmail, toName) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return;
+  
+  const textBody = `[SECURE TRANSMISSION RECEIVED]
+
+Target Identity: ${toName} <${toEmail}>
+Status: ENCRYPTED & LOGGED
+
+Your message has successfully breached the perimeter and reached Neo4U's secure relay.
+
+I have received your transmission. The contents are now encrypted with my public key and stored offline.
+I will decrypt and review your message, and respond when the time is right.
+
+---
+[END OF AUTOMATED RESPONSE]
+Neo4U / null_byte_`;
+
+  try {
+    await emailTransport.sendMail({
+      from: `"Neo4U Relay" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: '[null_byte] Transmission Received 👁️‍🗨️',
+      text: textBody
+    });
+    console.log(`[EMAIL] Ghost reply sent to ${toEmail}`);
+  } catch (err) {
+    console.error(`[EMAIL ERROR] Failed to send ghost reply: ${err.message}`);
+  }
+}
 
 /* ─── DATABASE SETUP ─── */
 const adapter = new FileSync(path.join(__dirname, 'portfolio_v2.db.json'));
@@ -475,6 +517,10 @@ app.post('/api/contact', rateLimit(15 * 60 * 1000, 3), (req, res) => {
   };
   db.get('messages').push(entry).write();
   console.log(`[MSG] ${entry.timestamp} | From: ${entry.name} <${entry.email}>`);
+  
+  // Fire ghost reply asynchronously (doesn't block the response)
+  sendGhostReply(entry.email, entry.name);
+  
   res.json({ success: true, id: entry.id });
 });
 
