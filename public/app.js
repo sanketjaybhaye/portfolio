@@ -178,7 +178,10 @@ buildHex(); setInterval(buildHex, 3500);
 ════════════════════════════════════════════════ */
 (function tick() {
   const el = document.getElementById('liveTime');
-  if (el) el.textContent = `ONLINE · UTC ${new Date().toUTCString().split(' ')[4]} · ACCEPTING CONTRACTS`;
+  if (el) {
+    const istTime = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour12: false });
+    el.textContent = `ONLINE · IST ${istTime} · ACCEPTING CONTRACTS`;
+  }
   setTimeout(tick, 1000);
 })();
 
