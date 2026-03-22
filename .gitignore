@@ -3,6 +3,7 @@ node_modules/
 
 # Database (auto-generated — contains user messages; keep out of git)
 portfolio.db.json
+portfolio_v2.db.json
 
 # Environment & secrets
 .env
@@ -26,3 +27,5 @@ npm-debug.log*
 
 # Test artifacts
 test_api.js
+
+PGP_GUIDE.md
