@@ -12,253 +12,404 @@ const db = low(adapter);
 
 /* ─── SEED DEFAULT DATA ─── */
 db.defaults({
-  profile: {
-    alias: 'null_byte',
-    location: '[REDACTED]',
-    clearance: 'root',
-    focus: ['web_pentesting', 'rev_engineering', 'exploit_dev', 'malware_analysis'],
-    certifications: 'OSCP·CEH·eJPT',
-    status: 'available',
-    bio: [
-      "A digital ghost operating at the edge of systems. I <em>break things legally</em> so they can't be broken illegally. 5+ years hunting vulnerabilities across web apps, binaries, and networks.",
-      "I've poked holes in Fortune 500 infrastructure, reported <em>zero-day vulnerabilities</em> to major vendors, and competed against the world's best hackers in elite CTF competitions.",
-      "Currently running <em>independent security research</em> and accepting pentest contracts. If you have a system that needs hardening — I'm your null byte."
+  "profile": {
+    "alias": "Sanket / Neo4U",
+    "location": "[REDACTED]",
+    "clearance": "root",
+    "focus": [
+      "web_pentesting",
+      "rev_engineering",
+      "exploit_dev",
+      "malware_analysis"
     ],
-    counters: [
-      { value: 134, label: 'CVEs Reported' },
-      { value: 52, label: 'CTFs Played' },
-      { value: 320, label: 'Bugs Found' },
-      { value: 14, label: 'Hall of Fames' }
-    ]
-  },
-
-  skills: [
-    {
-      id: 'web',
-      icon: '🕷',
-      title: 'Web Security',
-      bars: [
-        { name: 'SQL Injection', pct: 96 },
-        { name: 'XSS / CSRF / SSRF', pct: 93 },
-        { name: 'Auth Bypass / IDOR', pct: 91 },
-        { name: 'API Exploitation', pct: 88 }
-      ],
-      tools: []
-    },
-    {
-      id: 'rev',
-      icon: '🔬',
-      title: 'Reverse Engineering',
-      bars: [
-        { name: 'IDA Pro / Ghidra', pct: 90 },
-        { name: 'x86/x64 Assembly', pct: 85 },
-        { name: 'Binary Exploitation', pct: 82 },
-        { name: 'Malware Analysis', pct: 80 }
-      ],
-      tools: []
-    },
-    {
-      id: 'net',
-      icon: '🌐',
-      title: 'Network & Infra',
-      bars: [
-        { name: 'Network Recon', pct: 94 },
-        { name: 'Active Directory', pct: 84 },
-        { name: 'Packet Analysis', pct: 89 },
-        { name: 'Cloud Pentesting', pct: 76 }
-      ],
-      tools: []
-    },
-    {
-      id: 'lang',
-      icon: '⚙️',
-      title: 'Languages & Tools',
-      bars: [
-        { name: 'Python / Bash', pct: 96 },
-        { name: 'C / C++', pct: 74 },
-        { name: 'Metasploit / Burp Suite', pct: 93 },
-        { name: 'Nmap / Wireshark', pct: 91 }
-      ],
-      tools: ['Kali Linux', 'pwndbg', 'radare2', 'sqlmap', 'ffuf', 'hashcat', 'john', 'BeEF']
-    }
-  ],
-
-  projects: [
-    {
-      id: 'op-001',
-      badge: 'CRITICAL',
-      badgeClass: 'bc',
-      name: 'BYTE PHANTOM',
-      desc: 'Advanced SQLi framework with WAF-bypass chains. Handles time-based blind, error-based, union & stacked queries across MySQL, MSSQL, PostgreSQL, Oracle.',
-      tags: ['Python', 'SQLi', 'WAF Bypass', 'OWASP Top 10'],
-      links: [{ label: 'GitHub', href: '#' }, { label: 'Write-up', href: '#' }, { label: 'Demo', href: '#' }]
-    },
-    {
-      id: 'op-002',
-      badge: 'HIGH',
-      badgeClass: 'bh',
-      name: 'GHOST OSINT',
-      desc: 'Passive recon engine aggregating 45+ sources — DNS records, cert transparency logs, social media, darkweb paste sites. Full profile in under 60 seconds.',
-      tags: ['OSINT', 'Python', 'Recon', 'Threat Intel'],
-      links: [{ label: 'GitHub', href: '#' }, { label: 'Write-up', href: '#' }]
-    },
-    {
-      id: 'op-003',
-      badge: 'CRITICAL',
-      badgeClass: 'bc',
-      name: 'NULL LOADER',
-      desc: 'Polymorphic shellcode generator & loader with AMSI/EDR evasion. Defeats static and behavioral analysis. Generates position-independent shellcode for any arch.',
-      tags: ['C', 'ASM', 'AV Evasion', 'PE Injection'],
-      links: [{ label: 'Private Repo', href: '#' }, { label: 'Write-up', href: '#' }]
-    },
-    {
-      id: 'op-004',
-      badge: 'MEDIUM',
-      badgeClass: 'bm',
-      name: 'CIPHER AUDIT',
-      desc: 'TLS/crypto weakness scanner. Detects weak cipher suites, padding oracle, timing attacks, key mismanagement and BEAST/POODLE across web targets.',
-      tags: ['Crypto', 'TLS', 'Python', 'Audit'],
-      links: [{ label: 'GitHub', href: '#' }, { label: 'Demo', href: '#' }]
-    },
-    {
-      id: 'op-005',
-      badge: 'HIGH',
-      badgeClass: 'bh',
-      name: 'FUZZBYTE',
-      desc: 'Schema-aware REST API fuzzer. Auto-discovers undocumented endpoints, IDOR flaws, mass assignment bugs, and business logic vulnerabilities at scale.',
-      tags: ['API', 'Fuzzing', 'IDOR', 'REST'],
-      links: [{ label: 'GitHub', href: '#' }, { label: 'Demo', href: '#' }]
-    },
-    {
-      id: 'op-006',
-      badge: 'RESEARCH',
-      badgeClass: 'bl',
-      name: 'AD BLOODHOUND+',
-      desc: 'Extended Active Directory attack path tool. Identifies Kerberoastable accounts, DCSync paths, ACL abuses, and lateral movement chains in enterprise networks.',
-      tags: ['AD', 'Kerberos', 'PowerShell', 'BloodHound'],
-      links: [{ label: 'GitHub', href: '#' }, { label: 'Write-up', href: '#' }]
-    }
-  ],
-
-  ctf: {
-    scores: [
-      { rank: '#1', comp: 'DEF CON CTF 2024', pts: '9,820', gold: true },
-      { rank: '#1', comp: 'NahamCon CTF 2024', pts: '8,600', gold: true },
-      { rank: '#3', comp: 'HackTheBox Global', pts: '7,440', gold: false },
-      { rank: '#2', comp: 'Google CTF 2023', pts: '6,950', gold: false },
-      { rank: '#4', comp: 'PicoCTF 2023', pts: '6,700', gold: false },
-      { rank: '#5', comp: 'DownUnderCTF 2023', pts: '5,880', gold: false },
-      { rank: '#6', comp: 'CTFtime Global Top 10', pts: '5,200', gold: false }
+    "certifications": "B.Sc. CS · CTF Player",
+    "status": "WorkIn-Progress",
+    "bio": [
+      "I am a recent Computer Science graduate with a strong passion for cybersecurity, offensive security, and ethical hacking.",
+      "Currently, I spend most of my time learning new attack vectors and practicing on platforms like HackTheBox and TryHackMe, and hunting for vulnerabilities through independent research.",
+      "I am actively looking for full-time opportunities in Penetration Testing or Security Analyst roles to further develop my skills and contribute to secure environments."
     ],
-    achievements: [
+    "counters": [
       {
-        icon: '🏆',
-        title: 'DEF CON CTF FINALIST',
-        body: 'Top 5 worldwide in the most prestigious hacking competition. Solved 16 challenges across pwn, crypto, reversing, and web categories under extreme time pressure.',
-        foot: 'Las Vegas · 2024 · Team: PHANTOM_NULL'
+        "value": 0,
+        "label": "CVEs Reported"
       },
       {
-        icon: '🔓',
-        title: 'ZERO-DAY RCE — FORTUNE 500',
-        body: 'Discovered a critical remote code execution vulnerability in an enterprise authentication service used by millions. Responsibly disclosed. CVE-2024-XXXXX assigned.',
-        foot: 'Bug Bounty · $18,500 Reward · CRITICAL Severity'
+        "value": 10,
+        "label": "CTFs Played"
       },
       {
-        icon: '⭐',
-        title: 'HALL OF FAME × 14',
-        body: 'Recognized by Google, Microsoft, Meta, Apple, Amazon, and 9 others for responsible vulnerability disclosure through their official bug bounty programs.',
-        foot: '2020–2024 · Various Programs'
+        "value": 30,
+        "label": "Bugs Found"
       },
       {
-        icon: '📜',
-        title: 'OSCP + CEH + eJPT CERTIFIED',
-        body: 'Offensive Security Certified Professional with advanced pentesting credentials. Occasional trainer at university cybersecurity workshops and local hacker meetups.',
-        foot: 'Certifications · 2020–2024'
+        "value": 0,
+        "label": "Hall of Fames"
       }
     ]
   },
-
-  contactLinks: [
-    { platform: 'Email (PGP)', handle: 'nullbyte@pm.me', href: 'mailto:nullbyte@pm.me' },
-    { platform: 'GitHub', handle: 'github/null-byte', href: 'https://github.com/sanketjaybhaye' },
-    { platform: 'HackTheBox', handle: 'HTB/null_byte', href: 'https://app.hackthebox.com/profile/null_byte' },
-    { platform: 'Twitter / X', handle: '@null_byte_', href: 'https://twitter.com/null_byte_' }
-  ],
-
-  messages: [],
-
-  services: [
+  "skills": [
     {
-      icon: '🎯',
-      title: 'Penetration Testing',
-      desc: 'Full-scope web, network, and infrastructure pentests. OWASP-aligned methodology, detailed reports with PoC for every finding.',
-      tags: ['Web App', 'Network', 'API', 'Cloud']
+      "id": "web",
+      "icon": "🕷",
+      "title": "Web Security",
+      "bars": [
+        {
+          "name": "SQL Injection",
+          "pct": 96
+        },
+        {
+          "name": "XSS / CSRF / SSRF",
+          "pct": 93
+        },
+        {
+          "name": "Auth Bypass / IDOR",
+          "pct": 91
+        },
+        {
+          "name": "API Exploitation",
+          "pct": 88
+        }
+      ],
+      "tools": []
     },
     {
-      icon: '🔍',
-      title: 'Bug Bounty Consulting',
-      desc: 'Set up and triage your bug bounty program. Define scope, severity guidelines, and response workflows that attract quality researchers.',
-      tags: ['HackerOne', 'Bugcrowd', 'Private Programs']
+      "id": "rev",
+      "icon": "🔬",
+      "title": "Reverse Engineering",
+      "bars": [
+        {
+          "name": "IDA Pro / Ghidra",
+          "pct": 90
+        },
+        {
+          "name": "x86/x64 Assembly",
+          "pct": 85
+        },
+        {
+          "name": "Binary Exploitation",
+          "pct": 82
+        },
+        {
+          "name": "Malware Analysis",
+          "pct": 80
+        }
+      ],
+      "tools": []
     },
     {
-      icon: '📋',
-      title: 'Code & Architecture Review',
-      desc: 'Manual source code audit for security vulnerabilities. Covers authentication flaws, injection points, crypto misuse, and insecure design patterns.',
-      tags: ['SAST', 'DAST', 'Threat Modeling']
+      "id": "net",
+      "icon": "🌐",
+      "title": "Network & Infra",
+      "bars": [
+        {
+          "name": "Network Recon",
+          "pct": 94
+        },
+        {
+          "name": "Active Directory",
+          "pct": 84
+        },
+        {
+          "name": "Packet Analysis",
+          "pct": 89
+        },
+        {
+          "name": "Cloud Pentesting",
+          "pct": 76
+        }
+      ],
+      "tools": []
     },
     {
-      icon: '🎓',
-      title: 'Security Training',
-      desc: 'Hands-on workshops for developer teams: secure coding, OWASP Top 10 walkthroughs, CTF-style labs, and red team fundamentals.',
-      tags: ['Workshops', 'CTF Labs', 'Red Team Basics']
+      "id": "lang",
+      "icon": "⚙️",
+      "title": "Languages & Tools",
+      "bars": [
+        {
+          "name": "Python / Bash",
+          "pct": 96
+        },
+        {
+          "name": "C / C++",
+          "pct": 74
+        },
+        {
+          "name": "Metasploit / Burp Suite",
+          "pct": 93
+        },
+        {
+          "name": "Nmap / Wireshark",
+          "pct": 91
+        }
+      ],
+      "tools": [
+        "Kali Linux",
+        "nmap",
+        "Aircrack-ng",
+        "radare2",
+        "sqlmap",
+        "ffuf",
+        "hashcat",
+        "john",
+        "BeEF"
+      ]
     }
   ],
-
-  timeline: [
+  "projects": [
     {
-      year: '2024',
-      title: 'Independent Security Researcher',
-      org: 'Self-Employed',
-      type: 'work',
-      desc: 'Full-time independent research, private pentest engagements, and bug bounty hunting. DEF CON CTF finalist. 50+ CVEs reported.'
+      "id": "op-001",
+      "badge": "WEB3",
+      "badgeClass": "bh",
+      "name": "MINTARA NFT MARKETPLACE",
+      "desc": "A state-of-the-art decentralized platform for discovering, creating, and trading irreplaceable digital assets on the Ethereum blockchain.",
+      "tags": [
+        "JavaScript",
+        "Ethereum",
+        "Web3.js",
+        "Solidity"
+      ],
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/sanketjaybhaye/mintara-nft-marketplace"
+        }
+      ]
     },
     {
-      year: '2023',
-      title: 'Senior Penetration Tester',
-      org: 'Red Team Corp',
-      type: 'work',
-      desc: 'Led red team engagements for Fortune 500 clients. Specialized in Active Directory attacks, cloud infrastructure pentesting, and social engineering.'
+      "id": "op-002",
+      "badge": "RECON",
+      "badgeClass": "bc",
+      "name": "ROBO RECON",
+      "desc": "Advanced reconnaissance framework automating robots.txt analysis, sitemap crawling, hidden URL discovery, and target intelligence collection.",
+      "tags": [
+        "Python",
+        "Reconnaissance",
+        "Bug Bounty"
+      ],
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/sanketjaybhaye/RoboRecon"
+        }
+      ]
     },
     {
-      year: '2022',
-      title: 'OSCP + CEH Certified',
-      org: 'Offensive Security / EC-Council',
-      type: 'cert',
-      desc: 'Passed OSCP (Offensive Security Certified Professional) with distinction. Completed CEH practical exam. Began eJPT research track.'
+      "id": "op-003",
+      "badge": "TOOL",
+      "badgeClass": "bm",
+      "name": "KNOW IP",
+      "desc": "Information gathering tool that combines multiple network reconnaissance options into a single streamlined utility.",
+      "tags": [
+        "Shell",
+        "Info-Gathering",
+        "Network Security"
+      ],
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/sanketjaybhaye/KnowIP"
+        }
+      ]
     },
     {
-      year: '2021',
-      title: 'Security Analyst',
-      org: 'CyberShield Inc.',
-      type: 'work',
-      desc: 'SOC analyst and junior pentester. First CVE published (CVE-2021-XXXXX). Started competing in international CTF competitions.'
+      "id": "op-004",
+      "badge": "WIFI",
+      "badgeClass": "bm",
+      "name": "WIFI BREAKER",
+      "desc": "An educational wireless security auditing tool designed to understand network vulnerabilities and hardening techniques.",
+      "tags": [
+        "Shell",
+        "Wireless Security"
+      ],
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/sanketjaybhaye/WiFiBreaker"
+        }
+      ]
     },
     {
-      year: '2020',
-      title: 'B.Sc. Computer Science',
-      org: 'University of Technology',
-      type: 'edu',
-      desc: 'Graduated with First Class Honours. Thesis on adversarial machine learning and evasion attacks. Founded the university cyber security club.'
+      "id": "op-005",
+      "badge": "SCRAPER",
+      "badgeClass": "bl",
+      "name": "WEB SCRAPER",
+      "desc": "A Python-based utility for extracting data from websites. Built with consideration for permissions and ethical scraping practices.",
+      "tags": [
+        "Python",
+        "Data Extraction"
+      ],
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/sanketjaybhaye/Web_Scraper"
+        }
+      ]
+    },
+    {
+      "id": "op-006",
+      "badge": "GUIDE",
+      "badgeClass": "bl",
+      "name": "HACKING STUFF",
+      "desc": "A curated collection of resources, cheatsheets, and educational materials tailored for beginners diving into ethical hacking.",
+      "tags": [
+        "Python",
+        "Cheatsheets",
+        "Education"
+      ],
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/sanketjaybhaye/Hacking_Stuff"
+        }
+      ]
     }
   ],
-
-  pgp: {
-    fingerprint: '65F4 D2B0 2C38 CFB3 2534 E285 B1F6 20A7 3CD5 EB6E',
-    keyId: '0x3CD5EB6E',
-    keyUrl: '/public-key.asc',
-    algorithm: 'RSA 4096'
+  "ctf": {
+    "scores": [
+      {
+        "rank": "Top Tier",
+        "comp": "HackTheBox",
+        "pts": "#913",
+        "gold": true
+      },
+      {
+        "rank": "Active",
+        "comp": "TryHackMe",
+        "pts": "TOP 1%",
+        "gold": true
+      },
+      {
+        "rank": "#1",
+        "comp": "loveatfirstbreach CTF",
+        "pts": "2,400",
+        "gold": false
+      },
+      {
+        "rank": "Participant",
+        "comp": "PicoCTF 2024",
+        "pts": "",
+        "gold": false
+      }
+    ],
+    "achievements": [
+      {
+        "icon": "🎓",
+        "title": "COMPUTER SCIENCE GRADUATE",
+        "body": "Recently graduated with a degree in Computer Science, focusing on networking, software development, and foundational security concepts.",
+        "foot": "Class of 2026"
+      },
+      {
+        "icon": "🚩",
+        "title": "ACTIVE CTF PLAYER",
+        "body": "Regularly complete machines and participate in challenges on HackTheBox and TryHackMe. Focused on privilege escalation and web exploits.",
+        "foot": "HTB & THM Platforms"
+      },
+      {
+        "icon": "🐛",
+        "title": "INDEPENDENT BUG BOUNTY",
+        "body": "Actively hunting for vulnerabilities to gain practical experience. Found and reported 30+ security bugs in various programs.",
+        "foot": "2024 - Present"
+      }
+    ]
+  },
+  "contactLinks": [
+    {
+      "platform": "Email (PGP)",
+      "handle": "sanket.sec@proton.me",
+      "href": "mailto:sanket.sec@proton.me"
+    },
+    {
+      "platform": "GitHub",
+      "handle": "github/sanketjaybhaye",
+      "href": "https://github.com/sanketjaybhaye"
+    },
+    {
+      "platform": "HackTheBox",
+      "handle": "HTB/Neo4U",
+      "href": "https://app.hackthebox.com/users/2137346?profile-top-tab=machines&ownership-period=1M&profile-bottom-tab=prolabs"
+    },
+    {
+      "platform": "TryHackMe",
+      "handle": "@Neo4U",
+      "href": "https://tryhackme.com/p/Neo4U"
+    },
+    {
+      "platform": "Twitter / X",
+      "handle": "@null_byte_",
+      "href": "https://twitter.com/null_byte_"
+    }
+  ],
+  "messages": [
+    {
+      "id": 1774118415158,
+      "name": "sanket",
+      "email": "sanket.sec@proton.me",
+      "message": "-----BEGIN PGP MESSAGE-----\n\nwcFMAz4m2aDKUDu/AQ//a2lSi79DClzGbgTIr7cfV1pcAJxEv+PRZHkX+s4R\nr4FkNVeafIbX9x8c/Jet8Iq8rXq16xiI+oDBbTgauHN5ZY/DD7fzwEZOW0RE\nEcpPP5B71rQZNPsro4NKrLpBb4X2TaIdCssCll633g6WA+U+xIt8IJYTDv4s\n5goLrJsAbnl0OoztIGGaXaO8rDJ7rQKRFhrHcjnHwraz1iHQsusdO9aAR5AJ\nohp7picXVUFGTYbu7KSg9Xsm96WMPS4Ewq+V8ZzdEgM+S/aMvcofSxYec9gq\nSvYFU6Kb/GXHC09q+0TyYMhNUoe6WQAEPWGubHZj3s0NXZ/rLE8s7AlBx9cd\nfkJEEnp1Hs2ZQSIFcRPY1h43MamrowXnzgWKpWTdwpL+Ds9kwSpVkhEyXGIL\nZVlppQgwk6RYLLMlFT24pm7TFsm9gQHV05M5GNprKtxQ8SupP2LozInC1e/+\n1wKd2B12E6nbywAXJVdxcSeepl2WIVMkuDqG5DTkQ8GBfCMcqo9Te8PHUN2m\nJtTYSnl7V60ATl4EYe71fK3i4NoP1fke/eOyfuzNOA/mDKkUr+rZX/zwzqug\nCm7GhtoqQuOFCc8ola1kGZ64NZhewnYfwaJbAgj2N/ILKONayYr13KNZRTRE\nuhGnObU/YaxPUgzjmpG+9fVs2md6T7CCTdt222VlC4HSUgEaMgm0mW4adiOh\nPuzv/15lfHsHlwzUbI9Fwt6I8FbRqiNRI0toRrz1JexF+M93Em4yohsH7SWV\nMirdvi+JUlSXHPqlw2PHAn3fqOnLM1tYcz0=\n=7spj\n-----END PGP MESSAGE-----\n",
+      "timestamp": "2026-03-21T18:40:15.158Z"
+    }
+  ],
+  "services": [
+    {
+      "icon": "🎯",
+      "title": "Web App Penetration Testing",
+      "desc": "Familiar with OWASP Top 10 vulnerabilities, manual testing, and writing detailed vulnerability reports with PoCs.",
+      "tags": [
+        "Web App",
+        "Burp Suite",
+        "API"
+      ]
+    },
+    {
+      "icon": "🔍",
+      "title": "Vulnerability Assessment",
+      "desc": "Identifying security flaws and misconfigurations utilizing automated tools, paired with manual verification.",
+      "tags": [
+        "Nessus",
+        "Nmap",
+        "Analysis"
+      ]
+    },
+    {
+      "icon": "💻",
+      "title": "Secure Development Basics",
+      "desc": "Understanding of secure coding practices and common security pitfalls within the software development lifecycle.",
+      "tags": [
+        "Code Review",
+        "Python",
+        "Bash"
+      ]
+    }
+  ],
+  "timeline": [
+    {
+      "year": "2026",
+      "title": "B.Sc. Computer Science",
+      "org": "University",
+      "type": "edu",
+      "desc": "Graduated this year with a strong foundation in computer networks, algorithms, and cybersecurity principles."
+    },
+    {
+      "year": "2025",
+      "title": "Independent Security Researcher",
+      "org": "Bug Bounty Platforms",
+      "type": "work",
+      "desc": "Started hunting on Bug Bounty platforms and Vulnerability Disclosure Programs. Found 30+ bugs across various web assets."
+    },
+    {
+      "year": "2024",
+      "title": "Active CTF Player",
+      "org": "HackTheBox & TryHackMe",
+      "type": "cert",
+      "desc": "Began practical training on offensive security platforms. Completed numerous learning paths and rooted multiple machines."
+    }
+  ],
+  "pgp": {
+    "fingerprint": "65F4 D2B0 2C38 CFB3 2534 E285 B1F6 20A7 3CD5 EB6E",
+    "keyId": "0x3CD5EB6E",
+    "keyUrl": "/public-key.asc",
+    "algorithm": "RSA 4096"
   }
-
 }).write();
 
 /* ─── SIMPLE IN-MEMORY RATE LIMITER ─── */
