@@ -1286,4 +1286,9 @@ footer b { color:var(--green3); font-weight:400; }
   .tform-body { padding: 20px; }
   .tform-foot { padding: 0 20px 20px; }
   .pgp-toggle-row { flex-direction: column; align-items: stretch; gap: 12px; }
+  
+  /* Hero Text Wrapping Fixes */
+  .hero-meta { flex-wrap: wrap; gap: 8px 16px; line-height: 1.5; font-size: 0.6rem; letter-spacing: 3px; }
+  .hero-activity { display: flex; align-items: flex-start; gap: 8px; line-height: 1.6; font-size: 0.55rem; letter-spacing: 2px; }
+  .act-prefix { margin-right: 0; margin-top: -1px; white-space: nowrap; }
 }
