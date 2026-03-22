@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: null-byte-portfolio
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_TOKEN
+        generateValue: true   # Render auto-generates a secure random value

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Database (auto-generated — contains user messages; keep out of git)
+portfolio.db.json
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test artifacts
+test_api.js
