@@ -9,6 +9,7 @@ portfolio_v2.db.json
 .env
 .env.*
 !.env.example
+**/private-key.asc
 
 # OS files
 .DS_Store
