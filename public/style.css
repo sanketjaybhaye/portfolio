@@ -1392,7 +1392,7 @@ footer b { color:var(--green3); font-weight:400; }
   white-space: nowrap; gap: 40px;
   font-size: .58rem; letter-spacing: 2px;
   color: var(--mid);
-  animation: tf-scroll 50s linear infinite;
+  animation: tf-scroll 120s linear infinite;
 }
 /* Pause on hover */
 #threatFeed:hover .tf-ticker { animation-play-state: paused; }
