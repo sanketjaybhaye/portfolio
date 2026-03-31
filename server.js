@@ -6,6 +6,73 @@ const path = require('path');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 
+/* ─── THREAT FEED CACHE ─── */
+let threatFeedCache = null;
+let threatFeedFetchedAt = 0;
+const THREAT_FEED_TTL = 30 * 60 * 1000; // 30 minutes
+
+async function fetchThreatFeed() {
+  if (threatFeedCache && Date.now() - threatFeedFetchedAt < THREAT_FEED_TTL) {
+    return threatFeedCache;
+  }
+
+  const fallback = [
+    { sev: 'crit', text: 'CVE-2024-3400 · Palo Alto PAN-OS RCE — CVSS 10.0', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-3400' },
+    { sev: 'high', text: 'CVE-2024-21762 · Fortinet SSL-VPN auth bypass — CVSS 9.6', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-21762' },
+    { sev: 'crit', text: 'CVE-2024-27198 · JetBrains TeamCity auth bypass — CVSS 9.8', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-27198' },
+    { sev: 'med',  text: 'CVE-2024-23897 · Jenkins arbitrary file read — CVSS 7.5', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-23897' },
+    { sev: 'high', text: 'CVE-2024-1709 · ConnectWise ScreenConnect path traversal — CVSS 9.8', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-1709' },
+    { sev: 'crit', text: 'CVE-2023-46604 · Apache ActiveMQ RCE (actively exploited)', link: 'https://nvd.nist.gov/vuln/detail/CVE-2023-46604' },
+    { sev: 'high', text: 'CVE-2024-4577 · PHP CGI argument injection — CVSS 9.8', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-4577' },
+    { sev: 'high', text: 'CVE-2024-38080 · Windows Hyper-V Zero-day (in-the-wild)', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-38080' },
+    { sev: 'crit', text: 'CVE-2024-30078 · Windows WiFi Driver RCE — CVSS 8.8', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-30078' },
+    { sev: 'med',  text: 'Midnight Blizzard APT targeting government orgs via spear-phishing', link: '#' },
+  ];
+
+  try {
+    // Fetch latest CRITICAL CVEs from NVD API (free, no key needed)
+    const url = 'https://services.nvd.nist.gov/rest/json/cves/2.0?cvssV3Severity=CRITICAL&resultsPerPage=15&startIndex=0';
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json', 'User-Agent': 'Neo4U-Portfolio/1.0' }
+    });
+    clearTimeout(timeout);
+
+    if (!resp.ok) throw new Error(`NVD API ${resp.status}`);
+    const data = await resp.json();
+
+    const items = (data.vulnerabilities || []).slice(0, 12).map(v => {
+      const cve  = v.cve;
+      const id   = cve.id;
+      const desc = (cve.descriptions || []).find(d => d.lang === 'en')?.value || 'No description';
+      const shortDesc = desc.length > 90 ? desc.slice(0, 87) + '...' : desc;
+      const cvss = cve.metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore
+                || cve.metrics?.cvssMetricV30?.[0]?.cvssData?.baseScore
+                || cve.metrics?.cvssMetricV2?.[0]?.cvssData?.baseScore
+                || null;
+      const score = cvss ? ` — CVSS ${cvss}` : '';
+      const sev = cvss >= 9 ? 'crit' : cvss >= 7 ? 'high' : 'med';
+      return { sev, text: `${id} · ${shortDesc}${score}`, link: `https://nvd.nist.gov/vuln/detail/${id}` };
+    });
+
+    if (items.length > 0) {
+      threatFeedCache = items;
+      threatFeedFetchedAt = Date.now();
+      console.log(`[THREAT FEED] Fetched ${items.length} CVEs from NVD API`);
+      return items;
+    }
+  } catch (err) {
+    console.warn(`[THREAT FEED] NVD fetch failed: ${err.message} — using fallback`);
+  }
+
+  // Use fallback if fetch failed or returned nothing
+  threatFeedCache = fallback;
+  threatFeedFetchedAt = Date.now();
+  return fallback;
+}
+
 /* ─── EMAIL TRANSPORT SETUP (EMAILJS API) ─── */
 async function sendGhostReply(toEmail, toName) {
   const serviceId = process.env.EMAILJS_SERVICE_ID;
@@ -496,6 +563,17 @@ app.get('/api/contact-links', (req, res) => res.json(db.get('contactLinks').valu
 app.get('/api/services', (req, res) => res.json(db.get('services').value()));
 app.get('/api/timeline', (req, res) => res.json(db.get('timeline').value()));
 app.get('/api/pgp', (req, res) => res.json(db.get('pgp').value()));
+
+// Live threat feed — fetches from NVD API with caching
+app.get('/api/threat-feed', async (req, res) => {
+  try {
+    const items = await fetchThreatFeed();
+    res.json(items);
+  } catch (err) {
+    console.error('[THREAT FEED] Error:', err.message);
+    res.status(500).json([]);
+  }
+});
 
 // Contact form — rate limited: max 3 submissions per IP per 15 min
 app.post('/api/contact', rateLimit(15 * 60 * 1000, 3), (req, res) => {

@@ -174,6 +174,48 @@ function buildHex() {
 buildHex(); setInterval(buildHex, 3500);
 
 /* ════════════════════════════════════════════════
+   HERO HUD COUNTERS
+════════════════════════════════════════════════ */
+function initHUD() {
+  // Uptime — fake boot time anchored to page load
+  const startTime = Date.now();
+  function updateUptime() {
+    const el = document.getElementById('hudUptime');
+    if (!el) return;
+    const secs = Math.floor((Date.now() - startTime) / 1000);
+    const d = Math.floor(secs / 86400);
+    const h = Math.floor((secs % 86400) / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    el.textContent = `${d}d ${h}h ${m}m`;
+  }
+  setInterval(updateUptime, 60000);
+  updateUptime();
+
+  // Packets counter — random increments
+  let pkts = Math.floor(Math.random() * 50000) + 12000;
+  function updatePkts() {
+    const el = document.getElementById('hudPkts');
+    if (!el) return;
+    pkts += Math.floor(Math.random() * 120) + 30;
+    el.textContent = pkts.toLocaleString();
+  }
+  setInterval(updatePkts, 800);
+  updatePkts();
+
+  // System load — fluctuates realistically
+  let load = 0.8 + Math.random() * 0.4;
+  function updateLoad() {
+    const el = document.getElementById('hudLoad');
+    if (!el) return;
+    load += (Math.random() - 0.5) * 0.15;
+    load = Math.max(0.1, Math.min(3.5, load));
+    el.textContent = load.toFixed(2);
+  }
+  setInterval(updateLoad, 1500);
+  updateLoad();
+}
+
+/* ════════════════════════════════════════════════
    LIVE CLOCK
 ════════════════════════════════════════════════ */
 (function tick() {
@@ -257,6 +299,57 @@ setTimeout(() => {
   setTimeout(() => { document.body.style.filter = 'brightness(.8)'; setTimeout(() => document.body.style.filter = 'none', 45); }, 140);
   setTimeout(() => { document.body.style.filter = 'brightness(1.15)'; setTimeout(() => document.body.style.filter = 'none', 35); }, 350);
 }, 600);
+
+/* ════════════════════════════════════════════════
+   SECTION HEADING GLITCH SCRAMBLE
+════════════════════════════════════════════════ */
+function initHeadingScramble() {
+  const CHARS = '!@#$%^&*<>?/\\|[]{}~0123456789ABCDEF';
+  document.querySelectorAll('.sec-h').forEach(el => {
+    const original = el.textContent;
+    let animating = false;
+    el.addEventListener('mouseenter', () => {
+      if (animating) return;
+      animating = true;
+      let iter = 0;
+      const interval = setInterval(() => {
+        el.textContent = original.split('').map((ch, i) => {
+          if (ch === ' ') return ' ';
+          if (i < iter) return original[i];
+          return CHARS[Math.floor(Math.random() * CHARS.length)];
+        }).join('');
+        iter += 1.5;
+        if (iter > original.length) { el.textContent = original; clearInterval(interval); animating = false; }
+      }, 40);
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════
+   BUTTON PARTICLE EXPLOSION
+════════════════════════════════════════════════ */
+function initButtonParticles() {
+  document.querySelectorAll('.btn-solid, .btn-ghost').forEach(btn => {
+    btn.addEventListener('click', e => {
+      if (!tCtx) return;
+      const r = btn.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      for (let i = 0; i < 22; i++) {
+        const angle = (Math.PI * 2 * i) / 22 + Math.random() * 0.4;
+        const speed = 1.5 + Math.random() * 2.5;
+        particles.push({
+          x: cx, y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1.2,
+          life: 1,
+          size: Math.random() * 3.5 + 0.8,
+          g: Math.floor(200 + Math.random() * 55)
+        });
+      }
+    });
+  });
+}
 
 
 /* ════════════════════════════════════════════════
@@ -810,27 +903,38 @@ function initRadarChart() {
     }));
   });
 
-  // axis lines & labels
+  // axis lines & labels — split into 2 lines if long
   domains.forEach((d, i) => {
     const a = angleOffset + i * angleStep;
     const outer = polar(a, R);
-    const labelR = R + 22;
+    const labelR = R + 26;
     const lp = polar(a, labelR);
     svg.appendChild(el('line', {
       x1: CX, y1: CY, x2: outer.x, y2: outer.y,
       stroke: 'rgba(0,255,65,0.1)', 'stroke-width': '1',
     }));
-    const text = el('text', {
-      x: lp.x, y: lp.y,
-      'text-anchor': Math.abs(lp.x - CX) < 10 ? 'middle' : lp.x > CX ? 'start' : 'end',
-      'dominant-baseline': lp.y < CY ? 'auto' : 'hanging',
-      fill: 'rgba(0,255,65,0.4)',
-      'font-size': '9',
-      'font-family': 'Share Tech Mono, monospace',
-      'letter-spacing': '1',
-    });
-    text.textContent = d.label.toUpperCase();
-    svg.appendChild(text);
+
+    // Split label into 2 lines if long
+    const words = d.label.toUpperCase().split(' ');
+    const mid = Math.ceil(words.length / 2);
+    const line1 = words.slice(0, mid).join(' ');
+    const line2 = words.slice(mid).join(' ');
+    const anchor = Math.abs(lp.x - CX) < 10 ? 'middle' : lp.x > CX ? 'start' : 'end';
+    const baseline = lp.y < CY ? 'auto' : 'hanging';
+
+    if (line2) {
+      // Two-line label
+      const text1 = el('text', { x: lp.x, y: lp.y - 6, 'text-anchor': anchor, 'dominant-baseline': baseline, fill: 'rgba(0,255,65,0.45)', 'font-size': '8', 'font-family': 'Share Tech Mono, monospace', 'letter-spacing': '0.5' });
+      text1.textContent = line1;
+      svg.appendChild(text1);
+      const text2 = el('text', { x: lp.x, y: lp.y + 6, 'text-anchor': anchor, 'dominant-baseline': baseline, fill: 'rgba(0,255,65,0.45)', 'font-size': '8', 'font-family': 'Share Tech Mono, monospace', 'letter-spacing': '0.5' });
+      text2.textContent = line2;
+      svg.appendChild(text2);
+    } else {
+      const text = el('text', { x: lp.x, y: lp.y, 'text-anchor': anchor, 'dominant-baseline': baseline, fill: 'rgba(0,255,65,0.45)', 'font-size': '8', 'font-family': 'Share Tech Mono, monospace', 'letter-spacing': '0.5' });
+      text.textContent = line1;
+      svg.appendChild(text);
+    }
   });
 
   // data polygon — starts at 0 and animates
@@ -906,37 +1010,61 @@ function initRadarChart() {
     item.innerHTML = `<span class="radar-dot" style="background:${d.color};box-shadow:0 0 6px ${d.color}"></span>${d.label}<span class="radar-pct">${d.pct}%</span>`;
     legend.appendChild(item);
   });
+
+  // Tooltip on vertex dots
+  domains.forEach((d, i) => {
+    dots[i].style.cursor = 'pointer';
+    dots[i].addEventListener('mouseenter', () => {
+      dots[i].setAttribute('r', '6');
+    });
+    dots[i].addEventListener('mouseleave', () => {
+      dots[i].setAttribute('r', '4');
+    });
+  });
 }
 
 /* ════════════════════════════════════════════════
-   LIVE THREAT FEED
+   LIVE THREAT FEED — fetches real CVEs from /api/threat-feed
 ════════════════════════════════════════════════ */
-function initThreatFeed() {
+async function initThreatFeed() {
   const ticker = document.getElementById('tfTicker');
   if (!ticker) return;
 
-  const items = [
-    { sev: 'crit', text: 'CVE-2024-3400 · Palo Alto PAN-OS RCE — CVSS 10.0' },
-    { sev: 'high', text: 'CVE-2024-21762 · Fortinet SSL-VPN auth bypass — CVSS 9.6' },
-    { sev: 'crit', text: 'CVE-2024-27198 · JetBrains TeamCity auth bypass — CVSS 9.8' },
-    { sev: 'med',  text: 'CVE-2024-23897 · Jenkins arbitrary file read — CVSS 7.5' },
-    { sev: 'high', text: 'CVE-2024-1709 · ConnectWise ScreenConnect path traversal — CVSS 9.8' },
-    { sev: 'crit', text: 'CVE-2023-46604 · Apache ActiveMQ RCE (actively exploited)' },
-    { sev: 'high', text: 'CVE-2024-4577 · PHP CGI argument injection — CVSS 9.8' },
-    { sev: 'med',  text: 'New Kali Linux 2024.2 released with 18 new tools' },
-    { sev: 'high', text: 'CVE-2024-38080 · Windows Hyper-V Zero-day (in-the-wild)' },
-    { sev: 'crit', text: 'CVE-2024-30078 · Windows WiFi Driver RCE — CVSS 8.8' },
-    { sev: 'med',  text: 'HackerOne Bug Bounty: $500K paid out this month' },
-    { sev: 'crit', text: 'Midnight Blizzard APT targeting government orgs via spear-phishing' },
+  // Static fallback shown immediately while fetch runs
+  const fallback = [
+    { sev: 'crit', text: 'CVE-2024-3400 · Palo Alto PAN-OS RCE — CVSS 10.0', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-3400' },
+    { sev: 'high', text: 'CVE-2024-21762 · Fortinet SSL-VPN auth bypass — CVSS 9.6', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-21762' },
+    { sev: 'crit', text: 'CVE-2024-27198 · JetBrains TeamCity auth bypass — CVSS 9.8', link: '' },
+    { sev: 'med',  text: 'CVE-2024-23897 · Jenkins arbitrary file read — CVSS 7.5', link: '' },
+    { sev: 'high', text: 'CVE-2024-4577 · PHP CGI argument injection — CVSS 9.8', link: '' },
+    { sev: 'crit', text: 'CVE-2023-46604 · Apache ActiveMQ RCE (actively exploited)', link: '' },
   ];
 
-  // build ticker items (duplicated for seamless loop)
-  const html = [...items, ...items].map(it => {
-    const cls = `tf-sev-${it.sev}`;
-    const icon = it.sev === 'crit' ? '🔴' : it.sev === 'high' ? '🟠' : '🟡';
-    return `<span class="tf-item">${icon}&nbsp;<span class="${cls}">[${it.sev.toUpperCase()}]</span>&nbsp;${it.text}&nbsp;&nbsp;·&nbsp;</span>`;
-  }).join('');
-  ticker.innerHTML = html;
+  function renderTicker(items) {
+    const clsMap = { crit: 'tf-sev-crit', high: 'tf-sev-high', med: 'tf-sev-med' };
+    const iconMap = { crit: '🔴', high: '🟠', med: '🟡' };
+    // Duplicate for seamless loop
+    const html = [...items, ...items].map(it => {
+      const cls  = clsMap[it.sev] || 'tf-sev-med';
+      const icon = iconMap[it.sev] || '🟡';
+      const href = it.link && it.link !== '#' ? ` onclick="window.open('${it.link}','_blank')"` : '';
+      return `<span class="tf-item"${href}>${icon}&nbsp;<span class="${cls}">[${(it.sev||'med').toUpperCase()}]</span>&nbsp;${it.text}&nbsp;&nbsp;·&nbsp;</span>`;
+    }).join('');
+    ticker.innerHTML = html;
+  }
+
+  // Show fallback immediately
+  renderTicker(fallback);
+
+  // Fetch real CVEs from server (which calls NVD API with caching)
+  try {
+    const items = await fetch('/api/threat-feed').then(r => r.json());
+    if (Array.isArray(items) && items.length > 0) {
+      renderTicker(items);
+    }
+  } catch (e) {
+    console.warn('[Threat Feed] Could not load live feed:', e.message);
+  }
 }
 
 /* ════════════════════════════════════════════════
@@ -1028,8 +1156,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     init3DTilt();
     initHeroTerminal();
     initRadarChart();
-    initThreatFeed();
+    initThreatFeed();   // async — fetches real CVEs
     initKonamiCode();
+    initHUD();
+    initHeadingScramble();
+    initButtonParticles();
     hideLoader();
 
   } catch (err) {
