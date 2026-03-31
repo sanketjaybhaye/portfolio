@@ -1392,14 +1392,15 @@ footer b { color:var(--green3); font-weight:400; }
   white-space: nowrap; gap: 40px;
   font-size: .58rem; letter-spacing: 2px;
   color: var(--mid);
-  animation: tf-scroll 120s linear infinite;
+  animation: tf-scroll 60s linear infinite;
 }
 /* Pause on hover */
 #threatFeed:hover .tf-ticker { animation-play-state: paused; }
 #threatFeed:hover { cursor: default; border-top-color: rgba(255,34,0,.4); }
+/* Seamless: content is duplicated so -50% = exactly one copy = perfect loop */
 @keyframes tf-scroll {
-  from { transform: translateX(100vw); }
-  to   { transform: translateX(-200%); }
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 /* Threat feed item links */
 .tf-item { white-space: nowrap; cursor: pointer; transition: color .2s; }
