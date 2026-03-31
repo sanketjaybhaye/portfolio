@@ -340,17 +340,26 @@ section { padding:100px 60px 72px; }
 
 /* HUD status strip */
 .hero-hud {
-  display:flex; gap:24px; flex-wrap:wrap;
-  margin-top:14px; padding:8px 14px;
+  display:flex; flex-direction:row; flex-wrap:nowrap; align-items:center;
+  gap:0;
+  margin-top:14px; padding:7px 14px;
   border:1px solid var(--green5);
   background:rgba(0,255,65,.02);
-  font-size:.6rem; letter-spacing:3px;
+  font-size:.58rem; letter-spacing:2.5px;
   animation: fadeup .8s .7s ease both;
+  max-width:600px;
 }
-.hud-item { display:flex; gap:6px; align-items:center; color:var(--dim); }
-.hud-val  { color:var(--green3); }
-.hud-sep  { color:var(--green5); }
-.hud-live { color:var(--green); animation: panelblink 3s ease infinite; }
+.hud-item {
+  display:flex; align-items:center; gap:5px;
+  color:var(--dim);
+  padding:0 12px;
+  border-right:1px solid var(--green5);
+}
+.hud-item:first-child { padding-left:0; }
+.hud-item:last-child  { border-right:none; }
+.hud-label { color:var(--dim); }
+.hud-val  { color:var(--green3); font-weight:bold; }
+.hud-live { color:var(--green); animation: panelblink 2s ease infinite; }
 
 .hero-grid {
   display:grid;

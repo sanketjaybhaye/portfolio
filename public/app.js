@@ -864,14 +864,14 @@ function initRadarChart() {
   const legend = document.getElementById('radarLegend');
   if (!svg || !legend) return;
 
-  const CX = 200, CY = 200, R = 155;
+  const CX = 200, CY = 200, R = 130;
   const domains = [
-    { label: 'Web Pentesting',      pct: 92, color: '#00ff41' },
-    { label: 'Exploit Dev',         pct: 68, color: '#00ffcc' },
-    { label: 'Reverse Engineering', pct: 78, color: '#ffb000' },
-    { label: 'Network Security',    pct: 70, color: '#00cc34' },
-    { label: 'Malware Analysis',    pct: 62, color: '#00ffcc' },
-    { label: 'CTF / Challenges',    pct: 80, color: '#00ff41' },
+    { label: 'Web Pentesting',   pct: 92, color: '#00ff41' },
+    { label: 'Exploit Dev',      pct: 68, color: '#00ffcc' },
+    { label: 'Rev Engineering',  pct: 78, color: '#ffb000' },
+    { label: 'Network Security', pct: 70, color: '#00cc34' },
+    { label: 'Malware Analysis', pct: 62, color: '#00ffcc' },
+    { label: 'CTF Challenges',   pct: 80, color: '#00ff41' },
   ];
   const N = domains.length;
   const angleStep = (Math.PI * 2) / N;
