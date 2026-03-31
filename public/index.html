@@ -113,40 +113,18 @@
           <span id="activityTicker">Initializing...</span>
         </div>
       </div>
-      <div class="hero-right" aria-hidden="true">
-        <div class="hero-panel">
-          <div class="hp-bar">
+      <!-- INTERACTIVE TERMINAL -->
+      <div class="hero-right" id="heroTerminalWrap">
+        <div class="iterm">
+          <div class="iterm-bar">
             <span class="hp-dot hp-r"></span><span class="hp-dot hp-y"></span><span class="hp-dot hp-g"></span>
-            <span class="hp-title">status.sh</span>
+            <span class="iterm-title">Neo4U@darknode:~$ <span class="iterm-title-blink">▮</span></span>
+            <span class="iterm-hint">[type a command]</span>
           </div>
-          <div class="hp-body">
-            <span class="hp-line"><span class="hp-k">status</span><span class="hp-sep">:</span> <span
-                class="hp-v hp-green">ACTIVELY_HUNTING</span></span>
-            <span class="hp-line"><span class="hp-k">platform</span><span class="hp-sep">:</span> <span
-                class="hp-v">HackerOne + Bugcrowd</span></span>
-            <span class="hp-line"><span class="hp-k">bugs_found</span><span class="hp-sep">:</span> <span
-                class="hp-v hp-amber">30+</span></span>
-            <span class="hp-line"><span class="hp-k">ctfs_played</span><span class="hp-sep">:</span> <span
-                class="hp-v hp-amber">10+</span></span>
-            <span class="hp-line"><span class="hp-k">degree</span><span class="hp-sep">:</span> <span class="hp-v">B.Sc.
-                CS · Class of 2026</span></span>
-            <span class="hp-line"><span class="hp-k">focus</span><span class="hp-sep">:</span> <span
-                class="hp-v">Pentesting · Bug Bounty</span></span>
-            <span class="hp-line hp-blink"><span class="hp-k">availability</span><span class="hp-sep">:</span> <span
-                class="hp-v hp-green">OPEN TO WORK</span></span>
-          </div>
-        </div>
-        <div class="hero-skills-mini">
-          <span class="hsm-label">TECH STACK</span>
-          <div class="hsm-chips">
-            <span class="hsm-chip">Python</span>
-            <span class="hsm-chip">Burp Suite</span>
-            <span class="hsm-chip">Nmap</span>
-            <span class="hsm-chip">Kali Linux</span>
-            <span class="hsm-chip">Ghidra</span>
-            <span class="hsm-chip">Wireshark</span>
-            <span class="hsm-chip">sqlmap</span>
-            <span class="hsm-chip">ffuf</span>
+          <div class="iterm-output" id="itermOutput"></div>
+          <div class="iterm-input-row">
+            <span class="iterm-prompt">$&nbsp;</span>
+            <input class="iterm-input" id="itermInput" type="text" autocomplete="off" spellcheck="false" placeholder="try: help" aria-label="Terminal input">
           </div>
         </div>
       </div>
@@ -192,6 +170,13 @@
     <div class="rev">
       <div class="sec-tag">./skill_matrix</div>
       <h2 class="sec-h">ARSENAL</h2>
+    </div>
+    <!-- Radar Chart -->
+    <div class="radar-wrap rev">
+      <div class="radar-container">
+        <svg id="radarChart" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Skill radar chart"></svg>
+      </div>
+      <div class="radar-legend" id="radarLegend"></div>
     </div>
     <div class="skills-grid" id="skillsGrid"></div>
   </section>
@@ -355,6 +340,25 @@
 
   <!-- Scroll to Top -->
   <button id="scrollTop" class="scroll-top" aria-label="Scroll to top" title="Back to top">↑</button>
+
+  <!-- ══ LIVE THREAT FEED ══ -->
+  <div id="threatFeed" aria-hidden="true">
+    <span class="tf-badge">⚠ THREAT FEED</span>
+    <div class="tf-ticker-wrap">
+      <div class="tf-ticker" id="tfTicker"></div>
+    </div>
+  </div>
+
+  <!-- ══ KONAMI / BREACH OVERLAY ══ -->
+  <div id="breachOverlay" aria-hidden="true">
+    <div class="breach-inner">
+      <div class="breach-skull">☠</div>
+      <div class="breach-title">INTRUSION DETECTED</div>
+      <div class="breach-sub">TRACING ANOMALOUS INPUT SEQUENCE...</div>
+      <div class="breach-code" id="breachCode"></div>
+      <div class="breach-clear" id="breachClear">[ CLEARANCE GRANTED — WELCOME, FELLOW HACKER ]</div>
+    </div>
+  </div>
 
   <script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
   <script src="https://unpkg.com/openpgp@5.11.2/dist/openpgp.min.js"></script>
