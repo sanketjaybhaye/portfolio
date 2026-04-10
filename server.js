@@ -116,7 +116,7 @@ const adapter = new FileSync(path.join(__dirname, 'portfolio_v2.db.json'));
 const db = low(adapter);
 
 /* ─── SEED DEFAULT DATA ─── */
-db.defaults({
+const defaultSeed = {
   "writeups": [
     {
       "id": "htb-blue",
@@ -716,7 +716,16 @@ db.defaults({
     "keyUrl": "/public-key.asc",
     "algorithm": "RSA 4096"
   }
-}).write();
+};
+db.defaults(defaultSeed).write();
+
+// Render deploy fix: force populate array if it's currently empty (from an old deploy)
+if (!db.has('writeups').value() || db.get('writeups').value().length === 0) {
+  db.set('writeups', defaultSeed.writeups).write();
+}
+if (!db.has('certifications').value() || db.get('certifications').value().length === 0) {
+  db.set('certifications', defaultSeed.certifications).write();
+}
 
 /* ─── SIMPLE IN-MEMORY RATE LIMITER ─── */
 const rateLimitMap = new Map();

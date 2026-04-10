@@ -1718,7 +1718,7 @@ footer b { color:var(--green3); font-weight:400; }
 }
 
 /* Spacing fix for subtitle above filters */
-.rev + .wu-filters { margin-top: 32px; }
+.wu-filters { margin-top: 32px; }
 
 /* Scroll offset for fixed nav */
 section { scroll-margin-top: 60px; }
