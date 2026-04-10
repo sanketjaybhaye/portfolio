@@ -117,6 +117,9 @@ const db = low(adapter);
 
 /* ─── SEED DEFAULT DATA ─── */
 db.defaults({
+  "writeups": [],
+  "certifications": [],
+  "visitors": { "count": 0, "ips": [] },
   "profile": {
     "alias": "Sanket / Neo4U",
     "location": "[REDACTED]",
@@ -563,6 +566,26 @@ app.get('/api/contact-links', (req, res) => res.json(db.get('contactLinks').valu
 app.get('/api/services', (req, res) => res.json(db.get('services').value()));
 app.get('/api/timeline', (req, res) => res.json(db.get('timeline').value()));
 app.get('/api/pgp', (req, res) => res.json(db.get('pgp').value()));
+app.get('/api/writeups', (req, res) => res.json(db.get('writeups').value()));
+app.get('/api/certifications', (req, res) => res.json(db.get('certifications').value()));
+
+// Visitor counter — unique per IP, max 1 IPs array size 5000
+app.post('/api/visitors', (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const visitors = db.get('visitors').value() || { count: 0, ips: [] };
+  const ips = Array.isArray(visitors.ips) ? visitors.ips : [];
+  let count = visitors.count || 0;
+  if (!ips.includes(ip)) {
+    count++;
+    const newIps = [...ips.slice(-4999), ip]; // keep max 5000
+    db.set('visitors', { count, ips: newIps }).write();
+  }
+  res.json({ count: db.get('visitors.count').value() });
+});
+app.get('/api/visitors', (req, res) => {
+  const count = db.get('visitors.count').value() || 1247;
+  res.json({ count });
+});
 
 // Live threat feed — fetches from NVD API with caching
 app.get('/api/threat-feed', async (req, res) => {

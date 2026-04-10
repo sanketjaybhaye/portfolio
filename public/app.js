@@ -692,6 +692,9 @@ function initHeroTerminal() {
       '  <span class="iterm-cmd">cat resume</span>   — download resume info',
       '  <span class="iterm-cmd">sudo rm -rf</span>  — nice try',
       '  <span class="iterm-cmd">matrix</span>       — go deeper',
+      '  <span class="iterm-cmd">ascii</span>        — show ASCII banner',
+      '  <span class="iterm-cmd">resume</span>       — view/download resume',
+      '  <span class="iterm-cmd">writeups</span>     — list CTF writeups',
       '  <span class="iterm-cmd">clear</span>        — clear terminal',
     ],
     whoami: () => [
@@ -790,6 +793,27 @@ function initHeroTerminal() {
       '<span class="iterm-err">[sudo] password for neo4u: </span>',
       '<span class="iterm-err">rm: cannot remove \'/\': Permission denied</span>',
       '<span class="iterm-amber">Nice try. This system self-destructs on breach.</span>',
+    ],
+    ascii: () => [
+      '<span class="iterm-cmd">  _   _            _  _   _ </span>',
+      '<span class="iterm-cmd"> | \\ | | ___  ___ | || | | |</span>',
+      '<span class="iterm-cmd"> |  \\| |/ _ \\/ _ \\| || |_| |</span>',
+      '<span class="iterm-cmd"> | |\\  |  __/ (_) |__   _  |</span>',
+      '<span class="iterm-cmd"> |_| \\_|\\___|\\___|   |_| \\_/</span>',
+      '<span class="iterm-dim">  Ethical Hacker · Security Researcher</span>',
+      '<span class="iterm-amber">  HTB #913 · TryHackMe TOP 1% · Bug Bounty</span>',
+    ],
+    resume: () => {
+      setTimeout(() => { if(typeof openResumeModal === 'function') openResumeModal(); }, 200);
+      return ['<span class="iterm-dim">Opening resume viewer...</span>'];
+    },
+    writeups: () => [
+      '<span class="iterm-hi">[ CTF WRITEUPS ]</span>',
+      '<span class="iterm-res">Blue       (HTB) — EternalBlue / MS17-010</span>',
+      '<span class="iterm-res">Shocker    (HTB) — Shellshock CGI exploit</span>',
+      '<span class="iterm-res">Kenobi     (THM) — SMB + ProFTPD + SUID</span>',
+      '<span class="iterm-res">Pickle Rick(THM) — Web enumeration + RCE</span>',
+      '<span class="iterm-dim">→ See #writeups section for full breakdowns</span>',
     ],
     clear: () => null,
   };
@@ -1167,4 +1191,384 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('[Neo4U] Bootstrap failed:', err);
     hideLoader();
   }
+});
+
+
+/* ════════════════════════════════════════════════
+   RENDER WRITEUPS
+════════════════════════════════════════════════ */
+let allWriteups = [];
+function renderWriteups(writeups) {
+  allWriteups = writeups;
+  const grid = document.getElementById('wuGrid');
+  if (!grid) return;
+  grid.innerHTML = writeups.map((w, i) => {
+    const tags = w.tags.map(t => '<span class="wu-tag">' + t + '</span>').join('');
+    return '<div class="wu-card rev" style="--pi:' + i + '" data-platform="' + w.platform + '" data-diff="' + w.difficulty + '" onclick="openWuModal(allWriteups[' + i + '])">'
+         + '<div class="wu-card-head">'
+         + '<span class="wu-platform ' + w.platform + '">' + w.platform + '</span>'
+         + '<span class="wu-diff ' + w.difficulty + '">' + w.difficulty + '</span>'
+         + '</div>'
+         + '<div class="wu-card-name">' + w.name + '</div>'
+         + '<div class="wu-card-cat">' + w.category + ' &nbsp;·&nbsp; ' + (w.os || '') + '</div>'
+         + '<div class="wu-card-tags">' + tags + '</div>'
+         + '<div class="wu-card-foot">[ CLICK TO READ WRITEUP ]</div>'
+         + '</div>';
+  }).join('');
+
+  // Filter logic
+  document.querySelectorAll('.wu-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.wu-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      document.querySelectorAll('.wu-card').forEach(card => {
+        const show = f === 'all'
+          || card.dataset.platform === f
+          || card.dataset.diff === f;
+        card.classList.toggle('wu-card-hidden', !show);
+      });
+    });
+  });
+}
+
+function openWuModal(w) {
+  const modal = document.getElementById('wuModal');
+  if (!modal) return;
+  const pl = modal.querySelector('#wuModalPlatform');
+  pl.textContent = w.platform;
+  pl.className = 'wu-modal-platform ' + w.platform;
+  const df = modal.querySelector('#wuModalDiff');
+  df.textContent = w.difficulty;
+  df.className = 'wu-modal-diff ' + w.difficulty;
+  modal.querySelector('#wuModalName').textContent = w.name;
+  modal.querySelector('#wuModalCat').textContent = w.category + (w.os ? '  ·  ' + w.os : '');
+  modal.querySelector('#wuModalTags').innerHTML = w.tags.map(t => '<span class="wu-tag">' + t + '</span>').join('');
+  modal.querySelector('#wuModalSummary').textContent = w.summary;
+  modal.querySelector('#wuModalSteps').innerHTML = (w.steps || []).map((s, i) =>
+    '<div class="wu-step"><div class="wu-step-num">' + (i+1) + '</div><div>' + s + '</div></div>'
+  ).join('');
+  const link = modal.querySelector('#wuModalLink');
+  link.href = w.writeupUrl || '#';
+  if (!w.writeupUrl || w.writeupUrl === '#') { link.style.display = 'none'; } else { link.style.display = ''; }
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  applyCursorListeners();
+}
+window.closeWuModal = function() {
+  const modal = document.getElementById('wuModal');
+  if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
+};
+document.addEventListener('click', e => { if (e.target.id === 'wuModal') closeWuModal(); });
+
+/* ════════════════════════════════════════════════
+   RENDER CERTIFICATIONS
+════════════════════════════════════════════════ */
+function renderCertifications(certs) {
+  const grid = document.getElementById('certsGrid');
+  if (!grid) return;
+  grid.innerHTML = certs.map((c, i) => {
+    const colorStyle = 'color:' + c.color + ';border-color:' + c.color + ';';
+    return '<div class="cert-card rev" style="--si:' + i + ';border-color:' + c.color + '22">'
+         + '<div class="cert-status">' + c.status + '</div>'
+         + '<div class="cert-badge-wrap" style="' + colorStyle + '">' + c.badge + '</div>'
+         + '<div class="cert-platform">' + c.platform + '</div>'
+         + '<div class="cert-name" style="color:' + c.color + '">' + c.name + '</div>'
+         + '<div class="cert-desc">' + c.desc + '</div>'
+         + '<div class="cert-issued">Achieved: ' + c.issued + '</div>'
+         + (c.profileUrl && c.profileUrl !== '#certs' && c.profileUrl !== '#about'
+            ? '<a href="' + c.profileUrl + '" class="cert-link" target="_blank" rel="noopener">View Profile ↗</a>'
+            : '') + '</div>';
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════
+   RESUME MODAL
+════════════════════════════════════════════════ */
+window.openResumeModal = function() {
+  const modal = document.getElementById('resumeModal');
+  if (modal) { modal.classList.add('open'); document.body.style.overflow = 'hidden'; applyCursorListeners(); }
+};
+window.closeResumeModal = function() {
+  const modal = document.getElementById('resumeModal');
+  if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
+};
+document.addEventListener('click', e => { if (e.target.id === 'resumeModal') closeResumeModal(); });
+
+/* ════════════════════════════════════════════════
+   VISITOR COUNTER
+════════════════════════════════════════════════ */
+async function initVisitorCounter() {
+  try {
+    // Count this visit
+    const res = await fetch('/api/visitors', { method: 'POST' }).then(r => r.json());
+    const count = res.count || 0;
+    const el = document.getElementById('hudVisitors');
+    if (el) {
+      el.textContent = count.toLocaleString();
+      el.title = count.toLocaleString() + ' unique operators';
+    }
+  } catch (e) {
+    try {
+      const res = await fetch('/api/visitors').then(r => r.json());
+      const el = document.getElementById('hudVisitors');
+      if (el) el.textContent = (res.count || 0).toLocaleString();
+    } catch(e2) {}
+  }
+}
+
+/* ════════════════════════════════════════════════
+   WORLD MAP SVG (simple dot map showing India)
+════════════════════════════════════════════════ */
+function initWorldMap() {
+  const svg = document.getElementById('worldMapSvg');
+  if (!svg) return;
+
+  // Simplified continent outlines as path data (approximate, lightweight)
+  const continents = [
+    // North America
+    'M 80 80 L 160 60 L 200 90 L 210 140 L 180 170 L 140 160 L 100 130 Z',
+    // South America
+    'M 150 175 L 185 170 L 200 200 L 195 250 L 170 280 L 145 260 L 140 220 Z',
+    // Europe
+    'M 360 55 L 420 50 L 440 70 L 430 95 L 400 100 L 370 90 L 350 75 Z',
+    // Africa
+    'M 370 110 L 430 105 L 450 140 L 445 200 L 420 240 L 390 245 L 365 210 L 355 160 Z',
+    // Asia (simplified)
+    'M 440 45 L 600 40 L 640 65 L 650 100 L 620 130 L 580 145 L 530 150 L 490 140 L 460 120 L 435 90 Z',
+    // Australia
+    'M 560 210 L 620 200 L 650 220 L 645 260 L 610 275 L 565 265 L 550 240 Z',
+    // Greenland
+    'M 200 25 L 250 20 L 265 40 L 255 60 L 220 65 L 195 50 Z',
+  ];
+
+  const ns = 'http://www.w3.org/2000/svg';
+  continents.forEach(d => {
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'rgba(0,255,65,0.08)');
+    path.setAttribute('stroke', 'rgba(0,255,65,0.2)');
+    path.setAttribute('stroke-width', '0.5');
+    svg.appendChild(path);
+  });
+
+  // India pin position (approx 78E, 22N -> SVG coords)
+  // ViewBox 800x400, so lng maps to x: (78+180)/360*800=573, lat maps to y: (90-22)/180*400=151
+  const indiaX = 573, indiaY = 151;
+
+  // Pulsing ring
+  const ring = document.createElementNS(ns, 'circle');
+  ring.setAttribute('cx', indiaX);
+  ring.setAttribute('cy', indiaY);
+  ring.setAttribute('r', '6');
+  ring.setAttribute('fill', 'none');
+  ring.setAttribute('stroke', '#00ff41');
+  ring.setAttribute('stroke-width', '1.5');
+  ring.setAttribute('opacity', '0.6');
+  ring.classList.add('wm-pin-ring');
+  svg.appendChild(ring);
+
+  // Dot
+  const dot = document.createElementNS(ns, 'circle');
+  dot.setAttribute('cx', indiaX);
+  dot.setAttribute('cy', indiaY);
+  dot.setAttribute('r', '4');
+  dot.setAttribute('fill', '#00ff41');
+  dot.setAttribute('filter', 'url(#glow)');
+  dot.classList.add('wm-pin');
+  svg.appendChild(dot);
+
+  // Label
+  const label = document.createElementNS(ns, 'text');
+  label.setAttribute('x', indiaX + 10);
+  label.setAttribute('y', indiaY - 4);
+  label.setAttribute('fill', 'rgba(0,255,65,0.6)');
+  label.setAttribute('font-size', '10');
+  label.setAttribute('font-family', 'Share Tech Mono, monospace');
+  label.textContent = 'Neo4U';
+  svg.appendChild(label);
+}
+
+/* ════════════════════════════════════════════════
+   COMMAND PALETTE (Ctrl+K)
+════════════════════════════════════════════════ */
+function initCommandPalette() {
+  const overlay = document.getElementById('cmdPalette');
+  const input   = document.getElementById('cmdPaletteInput');
+  const results = document.getElementById('cmdPaletteResults');
+  if (!overlay || !input || !results) return;
+
+  // Items catalog
+  const items = [
+    // Sections
+    { icon: '🏠', label: 'Home — Hero', category: 'Section', action: () => document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '👤', label: 'About — Who am I', category: 'Section', action: () => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '⚔️', label: 'Skills — Arsenal', category: 'Section', action: () => document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '💻', label: 'Projects — Active Exploits', category: 'Section', action: () => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '🎯', label: 'Services — What I Offer', category: 'Section', action: () => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '📅', label: 'Timeline — Experience', category: 'Section', action: () => document.getElementById('timeline')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '🚩', label: 'CTF — Scoreboard', category: 'Section', action: () => document.getElementById('ctf')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '📝', label: 'Writeups — CTF Solutions', category: 'Section', action: () => document.getElementById('writeups')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '🏅', label: 'Certifications — Clearance Level', category: 'Section', action: () => document.getElementById('certs')?.scrollIntoView({ behavior: 'smooth' }) },
+    { icon: '✉️', label: 'Contact — Secure Channel', category: 'Section', action: () => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }) },
+    // Actions
+    { icon: '📄', label: 'View Resume', category: 'Action', action: () => openResumeModal() },
+    { icon: '🔑', label: 'Download PGP Key', category: 'Action', action: () => window.open('/public-key.asc', '_blank') },
+    { icon: '⬆️', label: 'Scroll to Top', category: 'Action', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+    // Links
+    { icon: '🐙', label: 'GitHub Profile', category: 'Link', action: () => window.open('https://github.com/sanketjaybhaye', '_blank') },
+    { icon: '🔴', label: 'HackTheBox Profile', category: 'Link', action: () => window.open('https://app.hackthebox.com/users/2137346', '_blank') },
+    { icon: '🟢', label: 'TryHackMe Profile', category: 'Link', action: () => window.open('https://tryhackme.com/p/Neo4U', '_blank') },
+  ];
+
+  let activeIdx = -1;
+
+  function renderResults(query) {
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? items.filter(it => it.label.toLowerCase().includes(q) || it.category.toLowerCase().includes(q))
+      : items;
+    activeIdx = filtered.length > 0 ? 0 : -1;
+
+    if (filtered.length === 0) {
+      results.innerHTML = '<div class="cp-no-results">> no results found for: ' + (query || '...') + '</div>';
+      return;
+    }
+
+    results.innerHTML = filtered.map((it, i) =>
+      '<div class="cp-result' + (i === 0 ? ' cp-active' : '') + '" data-idx="' + i + '">'
+      + '<div class="cp-icon">' + it.icon + '</div>'
+      + '<div class="cp-label">' + it.label + '</div>'
+      + '<div class="cp-category">' + it.category + '</div>'
+      + '</div>'
+    ).join('');
+
+    results.querySelectorAll('.cp-result').forEach((el, i) => {
+      el.addEventListener('click', () => { filtered[i].action(); closePalette(); });
+      el.addEventListener('mouseenter', () => {
+        activeIdx = i;
+        results.querySelectorAll('.cp-result').forEach(e => e.classList.remove('cp-active'));
+        el.classList.add('cp-active');
+      });
+    });
+    return filtered;
+  }
+
+  let currentFiltered = [];
+  function openPalette() {
+    overlay.classList.add('open');
+    input.value = '';
+    currentFiltered = renderResults('');
+    setTimeout(() => input.focus(), 50);
+  }
+  function closePalette() {
+    overlay.classList.remove('open');
+    input.value = '';
+  }
+
+  // Ctrl+K to open
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      overlay.classList.contains('open') ? closePalette() : openPalette();
+    }
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closePalette();
+
+    if (overlay.classList.contains('open')) {
+      const els = results.querySelectorAll('.cp-result');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIdx = Math.min(activeIdx + 1, els.length - 1);
+        els.forEach((el, i) => el.classList.toggle('cp-active', i === activeIdx));
+        els[activeIdx]?.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIdx = Math.max(activeIdx - 1, 0);
+        els.forEach((el, i) => el.classList.toggle('cp-active', i === activeIdx));
+        els[activeIdx]?.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && activeIdx >= 0 && currentFiltered) {
+        e.preventDefault();
+        currentFiltered[activeIdx]?.action();
+        closePalette();
+      }
+    }
+  });
+
+  input.addEventListener('input', () => { currentFiltered = renderResults(input.value); activeIdx = 0; });
+
+  // Click backdrop to close
+  overlay.addEventListener('click', e => { if (e.target === overlay) closePalette(); });
+
+  // Btn in nav
+  const btn = document.getElementById('cmdPaletteBtn');
+  if (btn) btn.addEventListener('click', openPalette);
+}
+
+/* ════════════════════════════════════════════════
+   TERMINAL TAB AUTOCOMPLETE + ASCII COMMAND
+════════════════════════════════════════════════ */
+function patchHeroTerminal() {
+  const input = document.getElementById('itermInput');
+  if (!input) return;
+
+  const cmdNames = ['help','whoami','skills','status','tools','pgp','contact','ctf','social','nmap','ls','cat resume','matrix','sudo rm -rf','clear','ascii'];
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const val = input.value.toLowerCase();
+      if (!val) return;
+      const match = cmdNames.find(c => c.startsWith(val) && c !== val);
+      if (match) {
+        input.value = match;
+      } else {
+        const matches = cmdNames.filter(c => c.startsWith(val));
+        if (matches.length > 1) {
+          const out = document.getElementById('itermOutput');
+          if (out) {
+            const span = document.createElement('span');
+            span.className = 'iterm-line';
+            span.innerHTML = '<span class="iterm-dim">' + matches.join('  ') + '</span>';
+            out.appendChild(span);
+            out.scrollTop = out.scrollHeight;
+          }
+        }
+      }
+    }
+  });
+
+  // Mobile quick commands
+  document.querySelectorAll('.mq-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      input.value = chip.dataset.cmd;
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      input.focus();
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════
+   BOOTSTRAP — UPDATE
+════════════════════════════════════════════════ */
+// Patch the DOMContentLoaded to call new functions.
+// We hook into window load as a supplement (main bootstrap runs in existing app.js)
+window.addEventListener('load', async () => {
+  try {
+    const [writeups, certifications] = await Promise.all([
+      fetch('/api/writeups').then(r => r.json()),
+      fetch('/api/certifications').then(r => r.json()),
+    ]);
+    renderWriteups(writeups);
+    renderCertifications(certifications);
+    observeAll();
+    applyCursorListeners();
+    initHeadingScramble();
+  } catch(e) {
+    console.warn('[Neo4U extras] Failed to load writeups/certs:', e.message);
+  }
+
+  initCommandPalette();
+  initVisitorCounter();
+  initWorldMap();
+  patchHeroTerminal();
 });
