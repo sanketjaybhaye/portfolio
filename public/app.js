@@ -450,7 +450,18 @@ function closeProjectModal() {
   document.body.style.overflow = '';
 }
 document.addEventListener('click',  e => { if (e.target.id==='projModal') closeProjectModal(); });
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeProjectModal(); });
+// Unified Escape handler — closes whichever modal/palette is open
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  var projModal = document.getElementById('projModal');
+  var wuModal   = document.getElementById('wuModal');
+  var resumeM   = document.getElementById('resumeModal');
+  var cmdPal    = document.getElementById('cmdPalette');
+  if (projModal && projModal.classList.contains('open'))  { closeProjectModal(); return; }
+  if (typeof closeWuModal==='function' && wuModal && wuModal.classList.contains('open'))    { closeWuModal(); return; }
+  if (typeof closeResumeModal==='function' && resumeM && resumeM.classList.contains('open')){ closeResumeModal(); return; }
+  if (cmdPal && cmdPal.classList.contains('open'))        { cmdPal.classList.remove('open'); }
+});
 
 /* ════════════════════════════════════════════════
    COPY TO CLIPBOARD
@@ -1277,8 +1288,10 @@ function renderCertifications(certs) {
          + '<div class="cert-desc">' + c.desc + '</div>'
          + '<div class="cert-issued">Achieved: ' + c.issued + '</div>'
          + (c.profileUrl && c.profileUrl !== '#certs' && c.profileUrl !== '#about'
-            ? '<a href="' + c.profileUrl + '" class="cert-link" target="_blank" rel="noopener">View Profile ↗</a>'
-            : '') + '</div>';
+            ? '<a href="' + c.profileUrl + '" class="cert-link" target="_blank" rel="noopener noreferrer">View Profile ↗</a>'
+            : '')
+         + '</div>';
+  // Note: </div> above closes .cert-card
   }).join('');
 }
 
@@ -1540,8 +1553,8 @@ function patchHeroTerminal() {
   // Mobile quick commands
   document.querySelectorAll('.mq-chip').forEach(chip => {
     chip.addEventListener('click', () => {
-      input.value = chip.dataset.cmd;
-      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      var cmd = chip.dataset.cmd;
+      if (cmd) { input.value = ''; runCommand(cmd); }
       input.focus();
     });
   });
@@ -1560,8 +1573,8 @@ window.addEventListener('load', async () => {
     ]);
     renderWriteups(writeups);
     renderCertifications(certifications);
-    observeAll();
-    applyCursorListeners();
+    // Observe newly added elements (avoids re-registering all existing ones)
+    document.querySelectorAll('.rev,.rev-l,.rev-r').forEach(function(el){ globalObserver.observe(el); });
     initHeadingScramble();
   } catch(e) {
     console.warn('[Neo4U extras] Failed to load writeups/certs:', e.message);

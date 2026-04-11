@@ -1667,8 +1667,11 @@ footer b { color:var(--green3); font-weight:400; }
 .wm-label { font-size:.62rem;letter-spacing:3px;color:var(--green3);margin-bottom:8px;text-align:center; }
 .world-map-svg { width:100%;height:auto;display:block;opacity:.6; }
 .wm-footer { font-size:.6rem;letter-spacing:2px;color:var(--dim);text-align:center;margin-top:8px; }
-@keyframes wm-pulse { 0%,100%{opacity:1;} 50%{opacity:.5;} }
-@keyframes wm-ring { 0%{opacity:.6;} 100%{opacity:0;r:18px;} }
+@keyframes wm-pulse { 0%,100%{opacity:1;r:4px;} 50%{opacity:.6;r:5px;} }
+@keyframes wm-ring  { 0%{stroke-opacity:.7;r:6px;} 100%{stroke-opacity:0;r:18px;} }
+/* Pin dot pulse + expanding ring */
+.wm-pin      { animation: wm-pulse 2s ease-in-out infinite; }
+.wm-pin-ring { animation: wm-ring  2s ease-out infinite; }
 
 /* MOBILE QUICK COMMANDS */
 .mobile-quick-cmds { display:none;gap:8px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--green5);background:rgba(0,255,65,.02); }

@@ -47,10 +47,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://unpkg.com">
-  <link rel="preload" href="style.css?v=2" as="style">
+  <link rel="preload" href="style.css?v=3" as="style">
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&amp;family=VT323&amp;family=Inconsolata:wght@300;400;700;900&amp;display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&amp;family=VT323&amp;family=Inconsolata:wght@300;400;700;900&amp;display=swap" rel="stylesheet"></noscript>
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 
   <!-- ═══ JSON-LD STRUCTURED DATA ═══ -->
   <script type="application/ld+json">
@@ -486,9 +486,9 @@
 
   <!-- FOOTER -->
   <footer class="wrap">
-    <span>© <span id="footerYear">2024</span> <b>Neo4U</b> — all systems exploited</span>
-    <span>PGP: <b id="pgpKey">A3F1 09BC 7E24 ···</b>
-      <button class="copy-btn-inline" onclick="copyToClipboard('A3F1 09BC 7E24',this)"
+    <span>© <span id="footerYear">2025</span> <b>Neo4U</b> — all systems exploited</span>
+    <span>PGP: <b id="pgpKey">65F4 D2B0 2C38 ···</b>
+      <button class="copy-btn-inline" onclick="copyToClipboard('65F4 D2B0 2C38 CFB3 2534 E285 B1F6 20A7 3CD5 EB6E',this)"
         title="Copy PGP fingerprint">COPY</button>
     </span>
   </footer>
@@ -551,7 +551,7 @@
         </div>
       </div>
       <div class="resume-foot">
-        <a href="/resume.pdf" class="btn btn-solid" download="Neo4U-Resume.pdf">↓ Download PDF</a>
+        <a href="/resume.pdf" class="btn btn-solid" download="Neo4U-Resume.pdf" onclick="if(!window._hasResumePDF){event.preventDefault();alert('Resume PDF not uploaded yet. Please contact via the contact form.');}">↓ Download PDF</a>
         <a href="https://github.com/sanketjaybhaye" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">GitHub Profile ↗</a>
       </div>
     </div>

