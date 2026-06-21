@@ -1,4 +1,4 @@
-# null_byte Portfolio
+# Neo4U Portfolio
 
 Hacker-themed personal portfolio built with **Node.js + Express + lowdb**.
 
